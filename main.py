@@ -20,4 +20,15 @@ def connect_to_sql():
 def create_tables(cursor):
     cursor.execute('''CREATE TABLE IF NOT EXISTS fantasy_football (id INT PRIMARY KEY auto_increment, player_name Text, 
     age INT, position TEXT, team_plays_on TEXT; ''')
+    
+def query_sql(cursor, query):
+    cursor.execute(query)
+    return cursor
 
+def main():
+    conn = connect_to_sql()
+    cursor = conn.cursor()
+    create_tables(cursor)
+
+if __name__ == '__main__':
+    main()
