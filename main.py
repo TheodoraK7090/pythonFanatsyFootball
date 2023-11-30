@@ -25,6 +25,45 @@ def query_sql(cursor, query):
     cursor.execute(query)
     return cursor
 
+def add_new_player(cursor, playerdetails):
+    name = playerdetails['player_name']
+    age = playerdetails["age"]
+    position = playerdetails['position']
+    team_plays_on = playerdetails['team_plays_on']
+    query = cursor.execute("INSERT INTO fantasy( player_name, age, position, team_plays_on" ") "
+                           "VALUES(%s,%s,%s)", (name, age, position, team_plays_on))
+the-sql-statement-python-mysql/
+    return query_sql(cursor, query)
+
+def check_if_player_exists(cursor, playerdetails):
+    player_name = playerdetails['player_name']
+    query = "SELECT * FROM fantasy WHERE player_name = \"%s\"" % player_name
+    return query_sql(cursor, query)
+
+def delete_player(cursor, playerdetails):
+    player_name = playerdetails['player_name']
+    query = "DELETE FROM fantasy WHERE player_name = \"%s\"" % player_name
+    return query_sql(cursor, query)
+
+def fetch_new_players():
+    query = requests.get("http://espn-fantasy-football-api.s3-website.us-east-2.amazonaws.com/")
+    datas = json.loads(query.text)
+    return datas
+
+def playerhunt( cursor):
+    playerpage = fetch_new_players()
+    add_or_delete_player( playerpage, cursor)
+
+def add_or_delete_player( playerpage, cursor):
+    for playerdetails in playerpage:
+        check_if_player_exists(cursor, playerdetails)
+        is_player_found = len(cursor.fetchall()) > 0
+        if is_player_found:
+            print("player is found: "+ playerdetails["player_name"] + " from " + playerdetails["team_plays_on"])
+        else:
+            print("New player is found: " + playerdetails["player_name"] + " from "+ playerdetails["team_plays_on"])
+            add_new_player(cursor, playerdetails)
+
 def main():
     conn = connect_to_sql()
     cursor = conn.cursor()
