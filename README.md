@@ -5,12 +5,12 @@ The group includes Theodora Kockel, Olakunle Abiola, and Nicholas McLendon.
 
 README for NFL Football Game Predictions
 
-Overview
+# Overview
 
 This Python script is designed to collect data from the Sportradar NFL API (v7) and store it in a MySQL database on a WAMP server for further analysis.You could also use a local database if you prefer. The collected data includes roster, and statistical information for all 32 teams in the NFL. The script is currently just analyzing data from the 2022 season, but can be adapted to data from a range of seasons including the current one. The script utilizes the "mysql.connector" library for database interactions and "requests" for making API calls.
 
 
-Before running the script, ensure the following: 
+# Before running the script, ensure the following: 
 
 Install the requests and mysql-connector libraries. Everything else should come standard with Python 3.11. 
 
@@ -31,7 +31,7 @@ You can now copy the displayed Key and use it for your API calls. Note that this
 The API key does not disappear from this page, so you can always retrieve it from here if needed.
 
 
-API Documentation.
+# API Documentation.
 
 You can find the documentation for the sportradar API at https://developer.sportradar.com/docs/read/american_football/NFL_v7#nfl-api-overview.
 
@@ -44,7 +44,7 @@ https://developer.sportradar.com/docs/read/american_football/NFL_v7#team-roster
 https://developer.sportradar.com/docs/read/american_football/NFL_v7#seasonal-statistics
 
 
-The calls are typically structured like this:
+# The calls are typically structured like this:
 
 "https://api.sportradar.us/nfl/official/{access_level}/{version}/{language_code}/games/{year}/{nfl_season}/schedule.{format}?api_key={your_api_key}"
 
@@ -65,7 +65,7 @@ Replace {your_api_key} with your NFL trial API key. (Or production API if applic
 Please note: This goes over the basic structure for calling one of the API endpoints, but each endpoint may require minor tweaks to this formula. Be sure to consult the documentation for the correct structure of the specific endpoint you are trying to call upon.
 
 
-Code Structure
+# Code Structure
 1. Database Connection
 The script establishes a connection to the MySQL server using the connect_to_sql function.
 2. Database Tables
@@ -87,7 +87,7 @@ predict_winner: Predicts the outcome of a match between two teams based on their
 7. Main Function
 The main function orchestrates the entire process. It fetches team data, team statistics, and player data, inserts them into the database, allows user input to predict the winner of a match, and displays the predicted winner.
 
-Usage
+# Usage
 
 python script_name.py
 
@@ -96,7 +96,7 @@ When running the script just follow the on-screen instructions to input team nam
 
 Please note: As of 12/3/2023 when entering the team names they must be spelled correctly and have their first letter capitalized. We’ll try to make the inputs a little less picky if we find the time.
 
-Potential Improvements
+# Potential Improvements
 
 Error Handling: Enhance error handling to provide more informative messages in case of API errors or database issues.
 
