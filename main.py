@@ -1,20 +1,19 @@
-#Theodora Kochel
-#CNE340 Fall 11/21/23
-#This code is setting up a database for creating a Fantasy Football team.  This will go into a WAMP server.
-#Nicholas McLendon and Olakunle Abiola are also partners in this project.
+# Theodora Kochel, Olakunle Abiola, and Nicholals McLendon
+# CNE340 Fall 2023
+# This code stores data from the sportsradar NFL API (v7) in a SQL database on a WAMP server for analysis.
 
 import mysql.connector as sql
 import time
 import requests
 import xml.dom.minidom
 
-# Establish connection to SQL server
+# Establish connection to SQL server and database
 def connect_to_sql():
     conn = sql.connect(user='root', password='',
                                    host='127.0.0.1', database='fantasy_football_db')
     return conn
 
-# Creates teams, players, and statistics tables if they don't already exist.
+# Creates teams, players, and team_statistics tables if they don't already exist.
 def create_tables(cursor):
     cursor.execute('''
             CREATE TABLE IF NOT EXISTS teams (
@@ -62,7 +61,7 @@ def create_tables(cursor):
     ''')
 
 
-# Inserts data into teams into their table, avoids duplicates
+# Inserts teams data into their table, avoids duplicates
 def insert_team_data(cursor, team_id, name, alias):
     try:
         cursor.execute('''
@@ -162,7 +161,7 @@ def fetch_nfl_teams(api_key):
 
     # Make sure the response code is good
     if response.status_code == 200:
-        # Convert the response into something more human readable. Made it much easier to work with.
+        # Convert the response into something more human-readable. Made it much easier to work with.
         dom = xml.dom.minidom.parseString(response.text)
         # Identify team elements so we can use their data.
         teams = dom.getElementsByTagNameNS("http://feed.elasticstats.com/schema/football/nfl/hierarchy-v7.0.xsd", "team")
@@ -171,7 +170,7 @@ def fetch_nfl_teams(api_key):
         print(f"Error: {response.status_code}")
         return []
 
-# Api call to Team Statistics endpoint
+# Api call to Seasonal Team Statistics endpoint
 def fetch_team_statistics(api_key, team_id):
     # Set endpoint and get response
     url = "http://api.sportradar.us/nfl/official/trial/v7/en/seasons/2022/REG/teams/{}/statistics.xml?api_key={}".format(str(team_id), api_key)
@@ -179,20 +178,20 @@ def fetch_team_statistics(api_key, team_id):
 
     # Make sure the response code is good
     if response.status_code == 200:
-        # Convert the response into something more human readable. Made it much easier to work with.
+        # Convert the response into something more human-readable. Made it much easier to work with.
         team_statistics = xml.dom.minidom.parseString(response.text)
         return team_statistics
     else:
         print(f"Error fetching team statistics for team_id {team_id}: {response.status_code}")
         return None
 
-# API call to Team Roster endpoint, we were originally going to use player data to make predictions, this was so I could find their unique player_id to use with the Player Statistics endpoint. Left code in just because.
+# API call to Team Roster endpoint, we were originally going to use player data to make predictions, this was so I could find their unique player_id to use with the Player Profile and Seasonal Statistics endpoints. Left code in just because.
 def fetch_team_roster(api_key, team_id):
     url = "https://api.sportradar.us/nfl/official/trial/v7/en/teams/{}/full_roster.json?api_key={}".format(str(team_id), api_key)
     response = requests.get(url)
 
     if response.status_code == 200:
-        roster_data = response.json()
+        roster_data = xml.dom.minidom.parseString(response.text)
         return roster_data.get('players', [])
     else:
         print(f"Error fetching roster for team_id {team_id}: {response.status_code}")
@@ -218,14 +217,14 @@ def query_team_statistics(cursor, team_name):
 
     # Retrieves the column names from the result set's description
     column_names = [description[0] for description in cursor.description]
-    # Creates dictionary that uses pairs of column names and their values, starting from the third column to skip the Primary Key and the team_id
+    # Creates a dictionary that pairs column names and their values, starting from the third column to skip the Primary Key and the team_id
     team_stats = dict(zip(column_names[2:], rows[0][2:]))
 
     print(team_stats)
 
     return team_stats
 
-# Function for querying the players table in a way that pulls the whole teams roster for potential analysis.
+# Function for querying the players table in a way that pulls the whole roster for a team.
 def query_roster(cursor, team_name):
     select_roster_query = "SELECT * FROM players WHERE team_name = %s"
     cursor.execute(select_roster_query, (team_name,))
@@ -240,11 +239,11 @@ def predict_winner(cursor, team1_name, team2_name):
     team1_stats = query_team_statistics(cursor, team1_name)
     team2_stats = query_team_statistics(cursor, team2_name)
 
-    # Initialize scores for each team
+    # Initialize scores for each team as zero.
     team1_score = 0
     team2_score = 0
 
-    # Compare values for each key and update scores
+    # Compare values for each key in the dictionaries and update scores
     for key in team1_stats:
         team1_value = team1_stats[key]
         team2_value = team2_stats[key]
@@ -276,12 +275,12 @@ def main():
     cursor = conn.cursor()
     create_tables(cursor)
 
-    # Create variable to iterate through the teams with
+    # Create variable to iterate through the teams data with
     nfl_teams = fetch_nfl_teams(api_key)
 
-    # Iterate through teams and insert them into the teams table.
+    # Iterate through teams and insert data into the teams table.
     for team in nfl_teams:
-        time.sleep(2)
+        time.sleep(2) # API will only take one request a second, this program generates a couple dozen while it runs. They were running faster than one a second so I would get 403 errors randomly that would leave holes in the tables/data. The sleep timer prevents this, but causes the program to take a couple minutes to finish running.
         team_id = team.getAttribute("id")
         name = team.getAttribute("name")
         alias = team.getAttribute("alias")
@@ -296,7 +295,7 @@ def main():
 
     # Iterate through teams and insert their statistics into the team_statistics table.
     for team in teams:
-        time.sleep(2) # API will only take one request a second, this program generates a couple dozen while it runs. They were running faster than one a second so I would I get 403 errors randomly that would leave holes in the tables/data. The sleep timer prevents this, but causes the program to take a couple minutes to finish running.
+        time.sleep(2) # API will only take one request a second, this program generates a couple dozen while it runs. They were running faster than one a second so I would get 403 errors randomly that would leave holes in the tables/data. The sleep timer prevents this, but causes the program to take a couple minutes to finish running.
         team_id, team_name = team
 
         # Fetch team statistics
@@ -306,7 +305,7 @@ def main():
         insert_team_statistics_data(cursor, team_id, team_name, team_statistics)
 
         # Fetch team roster
-        time.sleep(2) # API will only take one request a second, this program generates a couple dozen while it runs. They were running faster than one a second so I would I get 403 errors randomly that would leave holes in the tables/data. The sleep timer prevents this, but causes the program to take a couple minutes to finish running.
+        time.sleep(2) # API will only take one request a second, this program generates a couple dozen while it runs. They were running faster than one a second so I would get 403 errors randomly that would leave holes in the tables/data. The sleep timer prevents this, but causes the program to take a couple minutes to finish running.
         team_roster = fetch_team_roster(api_key, team_id)
 
         # Insert player data into the players table
@@ -333,7 +332,8 @@ def main():
 if __name__ == '__main__':
     main()
 
-# The code below was used while I was troubleshooting the predict_winner function once the data was already collected. I left it in just in case.
+# The code below was used while I was troubleshooting the predict_winner function after the data was already collected. I left it in just in case.
+
     #conn = connect_to_sql()
     #cursor = conn.cursor()
 
