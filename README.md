@@ -84,7 +84,11 @@ query_team_statistics: Queries the team_statistics table based on the team name.
 query_roster: Queries the players table to retrieve the entire roster for a team.
 6. Prediction Function
 predict_winner: Predicts the outcome of a match between two teams based on their statistics. Compares all of the collected statistics against each other for the two teams and assigns points for every key a team "wins" on. The team with the most points at the end of the comparison is declared the predicted winner.
-7. Main Function
+7. Graph Generation Function:
+generate_team_stats_graph: Generates a bar graph for a specific team's stats data.
+generate_specific_stats_graph: Generates a bar graph of specific statistics for a team.
+generate_comparison_stats_graph: Generates a graph comparing the stats of two teams against each other.
+8. Main Function
 The main function orchestrates the entire process. It fetches team data, team statistics, and player data, inserts them into the database, allows user input to predict the winner of a match, and displays the predicted winner.
 
 # Usage
