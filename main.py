@@ -6,6 +6,7 @@ import mysql.connector as sql
 import time
 import requests
 import xml.dom.minidom
+import matplotlib.pyplot as plt
 
 # Establish connection to SQL server and database
 def connect_to_sql():
@@ -233,6 +234,82 @@ def query_roster(cursor, team_name):
     for row in rows:
         print(row)
 
+# Function for generating a bar graph for a specific teams' stats data.
+def generate_team_stats_graph(cursor, team_name):
+    # Grabs team stats.
+    team_stats = query_team_statistics(cursor, team_name)
+
+    # Exits function if no stats found.
+    if not team_stats:
+        print(f"No statistics found for {team_name}")
+        return
+
+    # Includes all statistics and converts the values into floats.
+    statistics_labels = list(team_stats.keys())
+    statistics_values = [float(value) for value in team_stats.values()]
+
+    # Creates a bar graph
+    plt.bar(statistics_labels, statistics_values)
+    plt.title(f"Team Statistics for {team_name}")
+    plt.xlabel("Statistics")
+    plt.ylabel("Values")
+
+    plt.show()
+
+# Function for generating a bar graph of specific statistics for a team
+def generate_specific_stats_graph(cursor, team_name, statistics_labels):
+    # Grabs team stats
+    team_stats = query_team_statistics(cursor, team_name)
+
+    # Exits if no stats found.
+    if not team_stats:
+        print(f"No statistics found for {team_name}")
+        return
+
+    # Filter dictionary for team statistics based on specified labels
+    selected_stats = {label: team_stats[label] for label in statistics_labels}
+
+    # Convert values to floats
+    selected_stats = {label: float(value) for label, value in selected_stats.items()}
+
+    # Create a bar graph
+    plt.bar(selected_stats.keys(), selected_stats.values())
+    plt.title(f"Specific Team Statistics for {team_name}")
+    plt.xlabel("Statistics")
+    plt.ylabel("Values")
+
+    plt.show()
+
+# Function for generating a graph that compares the stats of two teams against each other.
+def generate_comparison_stats_graph(cursor, team1_name, team2_name, statistics_labels):
+    # Grabs team stats
+    team1_stats = query_team_statistics(cursor, team1_name)
+    team2_stats = query_team_statistics(cursor, team2_name)
+
+    # Exits if no stats found for one or both teams.
+    if not team1_stats or not team2_stats:
+        print(f"No statistics found for {team1_name} or {team2_name}")
+        return
+
+    # Filter dictionaries for team statistics based on specified labels
+    selected_team1_stats = {label: team1_stats[label] for label in statistics_labels}
+    selected_team2_stats = {label: team2_stats[label] for label in statistics_labels}
+
+    # Convert values to floats
+    selected_team1_stats = {label: float(value) for label, value in selected_team1_stats.items()}
+    selected_team2_stats = {label: float(value) for label, value in selected_team2_stats.items()}
+
+    # Create a line graph
+    plt.plot(selected_team1_stats.keys(), selected_team1_stats.values(), label=team1_name)
+    plt.plot(selected_team2_stats.keys(), selected_team2_stats.values(), label=team2_name)
+
+    plt.title(f"Comparison of Team Statistics: {team1_name} vs {team2_name}")
+    plt.xlabel("Statistics")
+    plt.ylabel("Values")
+
+    plt.legend()
+    plt.show()
+
 # Function for predicting the outcome of a match between two teams.
 def predict_winner(cursor, team1_name, team2_name):
     # Use query_team_statistics function to get team statistics
@@ -330,19 +407,29 @@ def main():
     conn.close()
 
 if __name__ == '__main__':
-    main()
+#    main()
 
 # The code below was used while I was troubleshooting the predict_winner function after the data was already collected. I left it in just in case.
 
-    #conn = connect_to_sql()
-    #cursor = conn.cursor()
+    conn = connect_to_sql()
+    cursor = conn.cursor()
 
-    #team1_name_input = input("Enter the name of team 1: ")
-    #team2_name_input = input("Enter the name of team 2: ")
+#    team1_name_input = input("Enter the name of team 1: ")
+#    team2_name_input = input("Enter the name of team 2: ")
 
-    #winner_prediction = predict_winner(cursor, team1_name_input, team2_name_input)
-    #print(f"The predicted winner is: {winner_prediction}")
+#    winner_prediction = predict_winner(cursor, team1_name_input, team2_name_input)
+#    print(f"The predicted winner is: {winner_prediction}")
 
-    #query_teams(cursor, input("Please enter a team name"))
-    #query_team_statistics(cursor, input("Please enter a team name"))
-    #query_roster(cursor, input("Please enter a team name"))
+#    generate_team_stats_graph(cursor, winner_prediction)
+    generate_specific_stats_graph(cursor, "Vikings", ["rushing_avg_yards", "receiving_avg_yards", "touchdowns", "field_goals_pct"])
+    generate_specific_stats_graph(cursor, "Dolphins", ["interceptions", "fourth_down_stops", "sacks"])
+    generate_comparison_stats_graph(cursor, "Vikings", "Dolphins", ["touchdowns", "rushing_avg_yards",
+                                "receiving_avg_yards", "pass_cmp_pct", "pass_interceptions",
+                                "pass_touchdowns", "field_goals_pct", "tloss", "sacks",
+                                "interceptions", "fourth_down_stops"])
+
+#    query_teams(cursor, input("Please enter a team name"))
+#    query_team_statistics(cursor, input("Please enter a team name"))
+#    query_roster(cursor, input("Please enter a team name"))
+
+
