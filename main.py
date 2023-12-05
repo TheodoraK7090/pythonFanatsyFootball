@@ -432,4 +432,4 @@ if __name__ == '__main__':
 #    query_team_statistics(cursor, input("Please enter a team name"))
 #    query_roster(cursor, input("Please enter a team name"))
 
-    conn.close()
+
