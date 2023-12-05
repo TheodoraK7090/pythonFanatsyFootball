@@ -191,7 +191,7 @@ def fetch_team_roster(api_key, team_id):
     response = requests.get(url)
 
     if response.status_code == 200:
-        roster_data = xml.dom.minidom.parseString(response.text)
+        roster_data = response.json()
         return roster_data.get('players', [])
     else:
         print(f"Error fetching roster for team_id {team_id}: {response.status_code}")
