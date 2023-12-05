@@ -423,10 +423,10 @@ if __name__ == '__main__':
 #    generate_team_stats_graph(cursor, winner_prediction)
     generate_specific_stats_graph(cursor, "Vikings", ["rushing_avg_yards", "receiving_avg_yards", "touchdowns", "field_goals_pct"])
     generate_specific_stats_graph(cursor, "Dolphins", ["interceptions", "fourth_down_stops", "sacks"])
-    generate_comparison_stats_graph(cursor, "Vikings", "Dolphins", ["touchdowns", "rushing_avg_yards", "rushing_attempts",
-                            "receiving_avg_yards", "receiving_targets", "pass_cmp_pct", "pass_interceptions",
-                            "pass_sack_yards", "pass_touchdowns", "field_goals_pct", "tloss", "sacks",
-                            "interceptions", "qb_hits", "three_and_outs_forced", "fourth_down_stops"])
+    generate_comparison_stats_graph(cursor, "Vikings", "Dolphins", ["touchdowns", "rushing_avg_yards",
+                                "receiving_avg_yards", "pass_cmp_pct", "pass_interceptions",
+                                "pass_touchdowns", "field_goals_pct", "tloss", "sacks",
+                                "interceptions", "fourth_down_stops"])
 
 #    query_teams(cursor, input("Please enter a team name"))
 #    query_team_statistics(cursor, input("Please enter a team name"))
