@@ -191,7 +191,7 @@ def fetch_team_roster(api_key, team_id):
     response = requests.get(url)
 
     if response.status_code == 200:
-        roster_data = xml.dom.minidom.parseString(response.text)
+        roster_data = response.json()
         return roster_data.get('players', [])
     else:
         print(f"Error fetching roster for team_id {team_id}: {response.status_code}")
@@ -268,7 +268,7 @@ def predict_winner(cursor, team1_name, team2_name):
 
 def main():
     # Set api key for use
-    api_key = "hzypnutkwajpqcpssmu4zaat"  # Replace with your own API key if you plan on running this project after the quarter is over as this one is temporary. You can ask Nick or refer to the documentation for guidance.
+    api_key = "ss35z843gvws95kyr4hp9rps"  # Replace with your own API key if you plan on running this project after the quarter is over as this one is temporary. You can ask Nick or refer to the documentation for guidance.
 
     # Create connection and cursor variables
     conn = connect_to_sql()
